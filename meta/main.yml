@@ -1,6 +1,7 @@
 ---
 dependencies: []
 galaxy_info:
+  role_name: cloud_ssh_public_key_scrape
   author: bonovoxly
   description: "Gets the public SSH key from various cloud providers (Google Cloud, AWS, and Azure) and adds them to the known_hosts file. Also configures ~/.ssh/config for human readability (i.e., ssh user@server)."
   company: Little Fluffy Clouds
