@@ -1,8 +1,8 @@
 galaxy_info:
   author: bonovoxly
-  description: Gets the public SSH key from various cloud providers (Google Cloud, AWS, and Azure) and adds them to the known_hosts file. Also configures ~/.ssh/config for human readability (i.e., ssh user@server).
+  description: "Gets the public SSH key from various cloud providers (Google Cloud, AWS, and Azure) and adds them to the known_hosts file. Also configures ~/.ssh/config for human readability (i.e., ssh user@server)."
   company: Little Fluffy Clouds
-  license: license BSD
+  license: BSD
   min_ansible_version: 2.5
   platforms:
     - name: MacOSX
