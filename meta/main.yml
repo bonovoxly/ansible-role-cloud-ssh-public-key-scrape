@@ -1,3 +1,5 @@
+---
+dependencies: []
 galaxy_info:
   author: bonovoxly
   description: "Gets the public SSH key from various cloud providers (Google Cloud, AWS, and Azure) and adds them to the known_hosts file. Also configures ~/.ssh/config for human readability (i.e., ssh user@server)."
@@ -20,7 +22,7 @@ galaxy_info:
     - name: Ubuntu
       versions:
         - all
-  galaxy_tags: []
+  galaxy_tags:
     - gcp
     - gcloud
     - google
