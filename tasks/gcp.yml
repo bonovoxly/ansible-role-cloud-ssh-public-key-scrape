@@ -1,0 +1,75 @@
+---
+# tasks file for GCP
+- name: Assert GCP project.
+  assert:
+    that: 
+      - project
+    msg: "The Google project must be defined."
+
+- name: Get all GCP VMs in the project.
+  shell: "gcloud --project {{ project }} compute instances list --format json | jq '[.[] | {name: .name, private_ip: .networkInterfaces[0].networkIP, public_ip: .networkInterfaces[0].accessConfigs[0].natIP, zone: .zone}]'"
+  register: gcp_vms
+
+- name: Debug.
+  debug:
+    msg: "{{ item.name }} - {{ item.private_ip }} - {{ item.public_ip }} {{ item.zone.split('/')[-1] }}"
+  with_items: "{{ gcp_vms.stdout }}"
+
+- name: Get all GCP public keys (IF they have been output to the serial console!)...
+  shell: gcloud compute --project={{ project }} instances get-serial-port-output {{ item.name }} --zone={{ item.zone.split('/')[-1] }} | grep ecdsa-sha2-nistp256 | tail -n 1 | awk '{ print $NF }'
+  with_items: "{{ gcp_vms.stdout }}"
+  register: gcp_keys
+
+- name: Debug keys...
+  debug:
+    msg: "{{ item.stdout }}"
+  with_items: "{{ gcp_keys.results }}"
+
+# initialization section
+- name: Touch ~/.ssh/config and ~/.ssh/known_hosts (creates them if they don't exist).
+  file:
+    path: "{{ item }}"
+    state: touch
+  with_items:
+    - "{{ ansible_env.HOME }}/.ssh/config"
+    - "{{ ansible_env.HOME }}/.ssh/known_hosts"
+
+# SSH configuration section
+- name: Remove previous SSH config settings.
+  blockinfile:
+    dest: "{{ ansible_env.HOME }}/.ssh/config"
+    marker: "# {mark} {{ project }} {{ item.name }} {{ item.zone.split('/')[-1] }} - ansible generated"
+    state: absent
+  with_items: "{{ gcp_vms.stdout }}"
+  when: skip_remove is not defined
+
+- name: Configure SSH proxy host.
+  blockinfile:
+    dest: "{{ ansible_env.HOME }}/.ssh/config"
+    marker: "# {mark} {{ project }} {{ item.name }} {{ item.zone.split('/')[-1] }} - ansible generated"
+    block: |
+      Host {{ item.name }}
+        HostName {% if item.public_ip is none %}{{ item.private_ip }}{% else %}{{ item.public_ip }}{% endif %}
+
+        ServerAliveInterval 30
+  with_items: "{{ gcp_vms.stdout }}"
+  when: wipe is not defined
+
+- name: Clean all environment created SSH fingerprints.
+  lineinfile:
+    dest: "{{ ansible_env.HOME }}/.ssh/known_hosts"
+    regexp: "^.*#\\s{{ project }} {{ item.name }} {{ item.zone.split('/')[-1] }} - ansible generated$"
+    state: absent
+  with_items: "{{ gcp_vms.stdout }}"
+  when: wipe is not defined
+
+- name: Import SSH fingerpints - private IP addresses for items found in the AWS system console.
+  lineinfile:
+    dest: "{{ ansible_env.HOME }}/.ssh/known_hosts"
+    line: "{{ item.0.name}},{{ item.0.private_ip }},{{ item.0.public_ip }} ecdsa-sha2-nistp256 {{ item.1.stdout }} # {{ project }} {{ item.0.name }} {{ item.0.zone.split('/')[-1] }} - ansible generated"
+  with_together:
+    - "{{ gcp_vms.stdout }}"
+    - "{{ gcp_keys.results }}"
+  when: wipe is not defined
+
+

@@ -1,0 +1,10 @@
+---
+# tasks file for cloud-ssh-public-key-scrape
+- name: Assert that cloud_platform is defined.
+  assert:
+    that: 
+      - cloud_platform is defined
+      msg: "cloud_platform must be defined (such as gcp, aws, or azure)."
+
+# include Cloud tasks.
+- include_tasks: "{{ cloud_platform }}.yml"
