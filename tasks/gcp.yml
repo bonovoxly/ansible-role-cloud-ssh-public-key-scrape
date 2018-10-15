@@ -3,7 +3,7 @@
 - name: Assert GCP project.
   assert:
     that: 
-      - project
+      - project is defined
     msg: "The Google project must be defined."
 
 - name: Get all GCP VMs in the project.
