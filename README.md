@@ -19,13 +19,24 @@ To use GCP, configure the local Google Cloud SDK. It will need permissions to th
 Role Variables
 --------------
 
-- Cloud provider. Currently supports GCP.
+```
+# The cloud provider to use. Supported versions include gce, aws, and azure. Required
+cloud_provider: gce
 
+# The path to use for the known_hosts file. Defaults to {{ ansible_env.HOME }}/.ssh/known_hosts.
+known_hosts: ./known_hosts
+
+## GCE Options
+# The GCE project. Only required for Google Cloud.
+project: operation-phoenix
+```
 
 Dependencies
 ------------
 
-None.
+- The Google Cloud SDK
+- The AWS SDK
+- The Azure SDK
 
 Example Playbook
 ----------------
