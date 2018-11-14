@@ -26,13 +26,13 @@
   with_items: "{{ gcp_keys.results }}"
 
 # initialization section
-- name: Touch ~/.ssh/config and ~/.ssh/known_hosts (creates them if they don't exist).
+- name: "Touch ~/.ssh/config and {{ known_hosts }} (creates them if they don't exist)."
   file:
     path: "{{ item }}"
     state: touch
   with_items:
     - "{{ ansible_env.HOME }}/.ssh/config"
-    - "{{ ansible_env.HOME }}/.ssh/known_hosts"
+    - "{{ known_hosts }}"
 
 # SSH configuration section
 - name: Remove previous SSH config settings.
@@ -57,7 +57,7 @@
 
 - name: Clean all environment created SSH fingerprints.
   lineinfile:
-    dest: "{{ ansible_env.HOME }}/.ssh/known_hosts"
+    dest: "{{ known_hosts }}"
     regexp: "^.*#\\s{{ project }} {{ item.name }} {{ item.zone.split('/')[-1] }} - ansible generated$"
     state: absent
   with_items: "{{ gcp_vms.stdout }}"
@@ -65,7 +65,7 @@
 
 - name: Import SSH fingerpints - private IP addresses for items found in the AWS system console.
   lineinfile:
-    dest: "{{ ansible_env.HOME }}/.ssh/known_hosts"
+    dest: "{{ known_hosts }}"
     line: "{{ item.0.name}},{{ item.0.private_ip }},{{ item.0.public_ip }} ecdsa-sha2-nistp256 {{ item.1.stdout }} # {{ project }} {{ item.0.name }} {{ item.0.zone.split('/')[-1] }} - ansible generated"
   with_together:
     - "{{ gcp_vms.stdout }}"
