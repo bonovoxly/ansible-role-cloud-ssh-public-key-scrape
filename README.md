@@ -20,8 +20,8 @@ Role Variables
 --------------
 
 ```
-# The cloud provider to use. Supported versions include gce, aws, and azure. Required
-cloud_provider: gce
+# The cloud provider to use. Supported versions include gcp, aws, and azure. Required
+cloud_provider: gcp
 
 # The path to use for the known_hosts file. Defaults to {{ ansible_env.HOME }}/.ssh/known_hosts.
 known_hosts: ./known_hosts
