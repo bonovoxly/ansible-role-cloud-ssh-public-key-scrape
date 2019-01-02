@@ -7,7 +7,8 @@
     msg: "The Google project must be defined."
 
 - name: Get all GCP VMs in the project.
-  shell: "gcloud --project {{ project }} compute instances list --format json | jq '.[] | select(.status == "RUNNING") | [.]' | jq '[.[] | {name: .name, private_ip: .networkInterfaces[0].networkIP, public_ip: .networkInterfaces[0].accessConfigs[0].natIP, zone: .zone}]'"
+  shell: >
+    gcloud --project {{ project }} compute instances list --format json | jq '.[] | select(.status == "RUNNING") | [.]' | jq '[.[] | {name: .name, private_ip: .networkInterfaces[0].networkIP, public_ip: .networkInterfaces[0].accessConfigs[0].natIP, zone: .zone}]'
   register: gcp_vms
 
 - name: Debug.
@@ -26,7 +27,7 @@
   with_items: "{{ gcp_keys.results }}"
 
 # initialization section
-- name: "Touch ~/.ssh/config and {{ known_hosts }} (creates them if they don't exist)."
+- name: Touch ~/.ssh/config and known_hosts (creates them if they don't exist).
   file:
     path: "{{ item }}"
     state: touch
